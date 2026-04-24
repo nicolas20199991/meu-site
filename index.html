@@ -3,59 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE BOUTIQUE | Premium Selection</title>
+    <title>LOJA | Modelo Mestre</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
         ::-webkit-scrollbar { display: none; }
-        body { font-family: 'Inter', sans-serif; transition: background 0.8s ease, color 0.8s ease; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; transition: background 0.8s ease, color 0.8s ease; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .font-serif-luxury { font-family: 'Playfair Display', serif; }
         
-        /* Adaptação Automática de Modo Escuro/Claro */
+        /* Ajuste de Modo Escuro Automático sem bordas bugadas */
         @media (prefers-color-scheme: dark) {
             body { background-color: #121212; color: #ededed; }
-            .glass { background: rgba(18, 18, 18, 0.85) !important; border-bottom: 1px solid #333 !important; }
+            .glass { background: rgba(18, 18, 18, 0.9) !important; border-bottom: 1px solid #222 !important; }
             #hero-overlay { background: #1a1a1a !important; }
             #logo-text, #hero-title, .product-card h3 { color: #fff !important; }
             .cat-btn.active { background: #fff !important; color: #000 !important; border-color: #fff !important; }
-            .product-card { border: 1px solid #333; }
+            .product-card { border: none !important; outline: none !important; } /* Remove bordas fantasmas */
         }
 
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .aspect-product { aspect-ratio: 3 / 4; object-fit: cover; }
+        .aspect-product { aspect-ratio: 3 / 4; object-fit: cover; border: none; }
         
+        /* Estabilização da Hero no Mobile (evita o bug de pular) */
+        #hero-section { min-height: 45vh; }
+        @media (max-width: 768px) {
+            #hero-section { height: 350px; min-height: 350px; }
+        }
+
         .fade-in { animation: fadeIn 0.4s ease forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .cat-btn.active { background: #111; color: white; border-color: #111; }
-        .touch-zoom { transition: transform 0.3s ease; }
-        .touch-zoom:active { transform: scale(1.5); z-index: 50; position: relative; }
     </style>
 </head>
 <body class="bg-[#fdfdfd] text-gray-900">
 
     <script>
         // ==========================================
-        // CONFIGURAÇÕES DO MODELO MÃE (PREENCHA AQUI)
+        // CONFIGURAÇÕES DO MODELO MESTRE
         // ==========================================
         const CONFIG = {
             nomeLoja: "The Boutique",
             whatsapp: "5547988973201", 
             
-            // DADOS DO SUPABASE (Exatamente como aparecem no painel)
-            Supabase_ProjectID: 'nhefdhzxzeddwjkzremz', // Exemplo: nhefdhzxzeddwjkzremz
-            Supabase_AnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U'      // Exemplo: eyJhbGciOiJIUzI1...
+            Supabase_ProjectID: 'nhefdhzxzeddwjkzremz',
+            Supabase_AnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U'
         };
         // ==========================================
 
-        // O código monta o link automaticamente para você!
-        const supabaseMontado = `https://${CONFIG.Supabase_ProjectID}.supabase.co`;
-        const _supabase = supabase.createClient(supabaseMontado, CONFIG.Supabase_AnonKey);
+        const supabaseUrl = `https://${CONFIG.Supabase_ProjectID}.supabase.co`;
+        const _supabase = supabase.createClient(supabaseUrl, CONFIG.Supabase_AnonKey);
 
         let currentMode = 'Adulto';
         let products = [];
@@ -66,20 +66,9 @@
 
         async function fetchStore() {
             const { data, error } = await _supabase.from('produtos').select('*');
-            if (!error) {
-                products = data;
-                renderStore();
-            }
+            if (!error) { products = data; renderStore(); }
         }
         window.onload = fetchStore;
-    </script>
-
-    <script>
-        document.write(`
-        <a href="https://wa.me/${CONFIG.whatsapp}" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg z-[9999] flex items-center justify-center hover:scale-110 transition-all">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-        </a>
-        `);
     </script>
 
     <header class="fixed top-0 w-full z-40 glass h-16 flex items-center justify-between px-6 lg:px-12">
@@ -91,12 +80,11 @@
         </button>
     </header>
 
-    <section class="relative w-full min-h-[45vh] flex flex-col items-center justify-center pt-16" id="hero-bg">
+    <section id="hero-section" class="relative w-full flex flex-col items-center justify-center pt-16">
         <div id="hero-overlay" class="absolute inset-0 bg-[#ebe7e0] transition-colors duration-1000"></div>
         <div class="relative z-10 text-center px-6">
-            <h1 class="text-5xl md:text-6xl font-serif-luxury mb-4" id="hero-title">The Collection.</h1>
-            <p class="text-[10px] text-gray-500 mb-8 uppercase tracking-[0.3em]">A Timeless Curated Selection.</p>
-            <div class="bg-white/50 backdrop-blur p-1 rounded-full flex items-center relative w-56 h-10 cursor-pointer shadow-sm mx-auto" onclick="toggleMode()">
+            <h1 id="hero-title" class="text-5xl md:text-6xl font-serif-luxury mb-4">The Collection.</h1>
+            <div class="bg-white/50 backdrop-blur p-1 rounded-full flex items-center relative w-56 h-10 cursor-pointer shadow-sm mx-auto mt-8" onclick="toggleMode()">
                 <div id="mode-slider" class="absolute left-1 top-1 bottom-1 w-[calc(50%-4px)] bg-[#2c2c2c] rounded-full transition-all duration-500"></div>
                 <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-white" id="txt-adulto">Adulto</div>
                 <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-gray-500" id="txt-infantil">Infantil</div>
@@ -143,33 +131,27 @@
         function renderStore() {
             const grid = document.getElementById('store-grid');
             const filtered = products.filter(p => p.sector === currentMode);
-            
             const categories = ['Tudo', ...new Set(filtered.map(p => p.category))];
+            
             document.getElementById('cat-bar').innerHTML = categories.map(c => `
-                <button onclick="currentCategory='${c}';renderStore()" class="cat-btn flex-shrink-0 px-4 py-1.5 rounded-full border text-[9px] font-bold uppercase tracking-widest transition-all ${currentCategory === c ? 'active' : 'text-gray-400 border-gray-200'}">
-                    ${c}
-                </button>
+                <button onclick="currentCategory='${c}';renderStore()" class="cat-btn flex-shrink-0 px-4 py-1.5 rounded-full border text-[9px] font-bold uppercase tracking-widest transition-all ${currentCategory === c ? 'active' : 'text-gray-400 border-gray-200'}">${c}</button>
             `).join('');
 
             const final = currentCategory === 'Tudo' ? filtered : filtered.filter(p => p.category === currentCategory);
-
             grid.innerHTML = final.map(p => `
                 <div class="group cursor-pointer fade-in product-card" onclick="openModal('${p.id}')">
                     <div class="overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-800 relative">
                         ${p.tag ? `<span class="absolute top-3 right-3 bg-black text-white text-[8px] font-bold px-2 py-1 rounded-sm z-10">${p.tag}</span>` : ''}
-                        <img src="${p.variants[0].image}" class="w-full aspect-product transition-transform duration-700 group-hover:scale-105">
+                        <img src="${p.variants[0].image}" class="w-full aspect-product transition-transform duration-700 group-hover:scale-105" loading="lazy">
                     </div>
                     <div class="mt-4 text-center">
                         <h3 class="text-[11px] font-bold uppercase tracking-tight">${p.name}</h3>
                         <p class="text-[11px] font-serif-luxury italic opacity-50 mt-1">R$ ${p.price.toFixed(2)}</p>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        let modalSelectedProduct = null;
-        let modalSelectedVariant = null;
-        let modalSelectedSize = null;
+        let modalSelectedProduct, modalSelectedVariant, modalSelectedSize;
 
         window.openModal = (id) => {
             modalSelectedProduct = products.find(prod => prod.id == id);
@@ -180,153 +162,43 @@
         };
 
         const updateModalContent = () => {
-            const p = modalSelectedProduct;
-            const v = modalSelectedVariant;
-            
-            // Lógica para cor de fundo baseada no tema do sistema
-            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const bgClass = isDarkMode ? 'bg-[#1a1a1a]' : (colorDict[v.color.toLowerCase()] || 'bg-gray-50');
+            const p = modalSelectedProduct; const v = modalSelectedVariant;
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const bgClass = isDark ? 'bg-[#1a1a1a]' : (colorDict[v.color.toLowerCase()] || 'bg-gray-50');
             
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal()"></div>
-                    <div id="modal-content-box" class="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl fade-in">
-                        <button onclick="closeModal()" class="absolute top-6 right-6 z-10 text-xl">✕</button>
-                        
-                        <div class="md:w-1/2 min-h-[400px] flex items-center justify-center ${bgClass} transition-colors duration-500">
-                            <img src="${v.image}" class="w-full h-full object-cover touch-zoom">
+                    <div class="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl fade-in">
+                        <button onclick="closeModal()" class="absolute top-6 right-6 z-20 text-xl">✕</button>
+                        <div class="md:w-1/2 min-h-[300px] md:min-h-[400px] flex items-center justify-center ${bgClass} transition-colors duration-500">
+                            <img src="${v.image}" class="w-full h-full object-cover">
                         </div>
-                        
                         <div class="md:w-1/2 p-8 lg:p-12 flex flex-col justify-center text-left">
-                            <p class="text-[9px] font-bold uppercase tracking-[0.2em] mb-2 opacity-40">${p.category || 'GERAL'}</p>
-                            <h2 class="text-3xl lg:text-4xl font-serif-luxury mb-2 italic">${p.name}</h2>
-                            <p class="text-xl font-bold mb-6">R$ ${p.price.toFixed(2)}</p>
-                            <p class="text-xs leading-relaxed opacity-60 mb-8">${p.description || ''}</p>
-                            
-                            <div class="mb-6">
-                                <p class="text-[9px] font-bold uppercase mb-3 opacity-40">Cor: ${v.color}</p>
-                                <div class="flex flex-wrap gap-2">
-                                    ${p.variants.map((varItem, i) => `
-                                        <button onclick="selectVariantInModal(${i})" class="px-4 py-2 border rounded-full text-[10px] font-bold uppercase transition-all ${varItem.color === v.color ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : 'border-gray-200 dark:border-gray-700'}">${varItem.color}</button>
-                                    `).join('')}
-                                </div>
+                            <h2 class="text-3xl font-serif-luxury mb-2 italic">${p.name}</h2>
+                            <p class="text-xl font-bold mb-6 opacity-40">R$ ${p.price.toFixed(2)}</p>
+                            <div class="mb-6"><p class="text-[9px] font-bold uppercase mb-3 opacity-40">Cor: ${v.color}</p>
+                                <div class="flex flex-wrap gap-2">${p.variants.map((vItem, i) => `<button onclick="selectVariantInModal(${i})" class="px-4 py-2 border rounded-full text-[10px] font-bold uppercase ${vItem.color === v.color ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : 'border-gray-200 dark:border-gray-700'}">${vItem.color}</button>`).join('')}</div>
                             </div>
-
-                            <div class="mb-8">
-                                <p class="text-[9px] font-bold uppercase mb-3 opacity-40">Tamanhos</p>
-                                <div class="flex flex-wrap gap-2">
-                                    ${Object.entries(v.sizes).map(([s, q]) => `
-                                        <button onclick="selectSizeInModal('${s}', ${q}, this)" class="size-btn px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] font-bold transition-all ${q === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-black dark:hover:border-white'} ${modalSelectedSize === s ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : ''}">${s}</button>
-                                    `).join('')}
-                                </div>
+                            <div class="mb-8"><p class="text-[9px] font-bold uppercase mb-3 opacity-40">Tamanhos</p>
+                                <div class="flex flex-wrap gap-2">${Object.entries(v.sizes).map(([s, q]) => `<button onclick="selectSizeInModal('${s}', ${q}, this)" class="size-btn px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] font-bold ${q === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-black'} ${modalSelectedSize === s ? 'bg-black text-white dark:bg-white dark:text-black' : ''}">${s}</button>`).join('')}</div>
                             </div>
-                            
-                            <div class="mt-auto">
-                                <button id="modal-add-btn" onclick="confirmAddToCart()" class="w-full bg-black text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all opacity-30 cursor-not-allowed" disabled>Selecione um tamanho</button>
-                            </div>
+                            <button id="modal-add-btn" onclick="confirmAddToCart()" class="w-full bg-black text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all opacity-30 cursor-not-allowed" disabled>Selecione um tamanho</button>
                         </div>
                     </div>
                 </div>`;
-                
-            // Se um tamanho já estava selecionado antes de mudar de cor, tentar manter ou resetar o botão
-            if(modalSelectedSize && v.sizes[modalSelectedSize] > 0) {
-                enableAddButton();
-            } else {
-                modalSelectedSize = null;
-            }
+            if(modalSelectedSize && v.sizes[modalSelectedSize] > 0) enableAddBtn();
         };
 
-        window.selectVariantInModal = (vidx) => {
-            modalSelectedVariant = modalSelectedProduct.variants[vidx];
-            updateModalContent();
-        };
-
-        window.selectSizeInModal = (size, qty, btn) => {
-            if(qty === 0) return;
-            modalSelectedSize = size;
-            
-            // Remove seleção anterior
-            document.querySelectorAll('.size-btn').forEach(b => {
-                b.classList.remove('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black', 'border-transparent');
-            });
-            
-            // Adiciona na nova
-            btn.classList.add('bg-black', 'text-white', 'dark:bg-white', 'dark:text-black', 'border-transparent');
-            enableAddButton();
-        };
-
-        function enableAddButton() {
-            const btn = document.getElementById('modal-add-btn');
-            if(btn) {
-                btn.disabled = false;
-                btn.classList.remove('opacity-30', 'cursor-not-allowed');
-                btn.innerText = 'Adicionar à Sacola';
-            }
-        }
-
-        window.confirmAddToCart = () => {
-            if(!modalSelectedSize) return;
-            
-            if (navigator.vibrate) navigator.vibrate(50);
-            cart.push({ 
-                name: modalSelectedProduct.name, 
-                price: modalSelectedProduct.price, 
-                color: modalSelectedVariant.color, 
-                size: modalSelectedSize, 
-                image: modalSelectedVariant.image 
-            });
-            
-            document.getElementById('cart-badge').innerText = cart.length;
-            document.getElementById('cart-badge').classList.remove('hidden');
-            
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-            renderCart();
-            closeModal();
-        };
-
-        function renderCart() {
-            const cont = document.getElementById('cart-items');
-            cont.innerHTML = cart.map((item, i) => `
-                <div class="flex gap-4 items-center bg-gray-50 dark:bg-zinc-800 p-3 rounded-xl">
-                    <img src="${item.image}" class="w-12 h-16 object-cover rounded-lg">
-                    <div class="flex-1 text-[10px]">
-                        <p class="font-bold uppercase">${item.name}</p>
-                        <p class="opacity-50 mt-1">${item.color} • ${item.size}</p>
-                        <p class="font-bold mt-1">R$ ${item.price.toFixed(2)}</p>
-                    </div>
-                    <button onclick="cart.splice(${i},1);renderCart();updateBadge()">✕</button>
-                </div>`).join('');
-            
-            const total = cart.reduce((sum, i) => sum + i.price, 0);
-            document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
-        }
-
-        window.updateBadge = () => {
-            const b = document.getElementById('cart-badge');
-            b.innerText = cart.length;
-            if(cart.length === 0) b.classList.add('hidden');
-        };
-
-        window.toggleCart = () => {
-            const s = document.getElementById('cart-sidebar');
-            const o = document.getElementById('cart-overlay');
-            const open = s.classList.contains('translate-x-0');
-            s.classList.toggle('translate-x-0', !open);
-            s.classList.toggle('translate-x-full', open);
-            o.classList.toggle('hidden', open);
-        };
-
-        window.closeModal = () => { 
-            document.getElementById('modal-container').innerHTML = ''; 
-            document.body.style.overflow = 'auto'; 
-            modalSelectedProduct = null;
-        };
-
-        function checkoutWhatsApp() {
-            let msg = `Olá! Gostaria de encomendar:\n\n` + cart.map(i => `• ${i.name} (${i.color} / ${i.size})`).join('\n');
-            msg += `\n\nTotal: ${document.getElementById('cart-total').innerText}`;
-            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`);
-        }
+        window.selectVariantInModal = (vidx) => { modalSelectedVariant = modalSelectedProduct.variants[vidx]; updateModalContent(); };
+        window.selectSizeInModal = (s, q, btn) => { if(q===0) return; modalSelectedSize = s; enableAddBtn(); updateModalContent(); };
+        function enableAddBtn() { const b = document.getElementById('modal-add-btn'); if(b) { b.disabled = false; b.classList.remove('opacity-30', 'cursor-not-allowed'); b.innerText = 'Adicionar à Sacola'; } }
+        window.confirmAddToCart = () => { cart.push({ name: modalSelectedProduct.name, price: modalSelectedProduct.price, color: modalSelectedVariant.color, size: modalSelectedSize, image: modalSelectedVariant.image }); updateBadge(); renderCart(); closeModal(); confetti({ particleCount: 50 }); };
+        function renderCart() { const cont = document.getElementById('cart-items'); cont.innerHTML = cart.map((it, i) => `<div class="flex gap-4 items-center bg-gray-50 dark:bg-zinc-800 p-3 rounded-xl"><img src="${it.image}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 text-[10px] font-bold uppercase"><p>${it.name}</p><p class="opacity-50 mt-1">${it.color} • ${it.size}</p></div><button onclick="cart.splice(${i},1);renderCart();updateBadge()">✕</button></div>`).join(''); document.getElementById('cart-total').innerText = `R$ ${cart.reduce((s, i) => s + i.price, 0).toFixed(2)}`; }
+        window.updateBadge = () => { const b = document.getElementById('cart-badge'); b.innerText = cart.length; b.classList.toggle('hidden', cart.length === 0); };
+        window.toggleCart = () => { const s = document.getElementById('cart-sidebar'); const o = document.getElementById('cart-overlay'); const op = s.classList.contains('translate-x-0'); s.classList.toggle('translate-x-0', !op); s.classList.toggle('translate-x-full', op); o.classList.toggle('hidden', op); };
+        window.closeModal = () => { document.getElementById('modal-container').innerHTML = ''; document.body.style.overflow = 'auto'; };
+        function checkoutWhatsApp() { let msg = `Olá! Encomenda:\n\n` + cart.map(i => `• ${i.name} (${i.color}/${i.size})`).join('\n'); window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`); }
     </script>
 </body>
 </html>
