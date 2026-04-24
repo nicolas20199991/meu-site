@@ -7,33 +7,27 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
     
     <style>
         ::-webkit-scrollbar { display: none; }
-        /* Removida a trava de cor do Tailwind para evitar conflitos no Mobile */
         body { font-family: 'Inter', sans-serif; background-color: #fdfdfd; color: #111; transition: background 0.8s ease, color 0.8s ease; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
         .font-serif-luxury { font-family: 'Playfair Display', serif; }
         .font-kids { font-family: 'Quicksand', sans-serif; }
         
-        /* MODO ESCURO AUTOMÁTICO REFINADO */
         @media (prefers-color-scheme: dark) {
             body { background-color: #121212 !important; color: #ededed !important; }
             .glass { background: rgba(18, 18, 18, 0.9) !important; border-bottom: 1px solid #222 !important; }
-            
             #hero-overlay { background: #1a1a1a !important; }
             #logo-text, #hero-title, .product-card h3 { color: #fff !important; }
-            
             .cat-btn.active { background: #fff !important; color: #000 !important; border-color: #fff !important; }
             .cat-btn { color: #888 !important; border-color: #333 !important; }
             .product-card { border: none !important; outline: none !important; }
-            
-            /* Correção da Sacola Ilegível */
             #cart-sidebar { background-color: #18181b !important; color: #ededed !important; border-left: 1px solid #333; }
-            .cart-item-card { background-color: #27272a !important; color: #ededed !important; }
+            .cart-item-card { background-color: #27272a !important; color: #ededed !important; border-color: #333 !important;}
             #cart-footer { background-color: #1f1f22 !important; border-color: #333 !important; }
+            .cat-wrapper { background: rgba(255,255,255,0.05) !important; border-color: #333 !important; }
         }
 
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.05); }
@@ -42,6 +36,10 @@
         .fade-in { animation: fadeIn 0.4s ease forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .cat-btn.active { background: #111; color: white; border-color: #111; }
+        
+        /* Fundo suave dinâmico do modal */
+        #modal-color-bg { transition: background-color 0.6s ease; }
+        #modal-main-img { transition: opacity 0.3s ease; }
     </style>
 </head>
 <body>
@@ -52,7 +50,7 @@
         // ==========================================
         const CONFIG = {
             nomeLoja: "The Boutique",
-            nomeLojaInfantil: "The Little Boutique", // Nome que aparece no modo infantil
+            nomeLojaInfantil: "The Little Boutique", 
             whatsapp: "5547988973201", 
             
             Supabase_ProjectID: 'nhefdhzxzeddwjkzremz',
@@ -68,7 +66,8 @@
         let cart = [];
         let currentCategory = 'Tudo';
 
-        const colorDict = { 'azul': 'bg-blue-50', 'rosa': 'bg-pink-50', 'verde': 'bg-green-50', 'amarel': 'bg-yellow-50', 'pret': 'bg-gray-200', 'branc': 'bg-gray-50', 'vermelh': 'bg-red-50', 'rox': 'bg-purple-50', 'laranj': 'bg-orange-50' };
+        // Tabela de cores refinada para o Modal em HEX
+        const colorDict = { 'azul': '#eff6ff', 'rosa': '#fdf2f8', 'verde': '#f0fdf4', 'amarelo': '#fefce8', 'preto': '#f3f4f6', 'branco': '#ffffff', 'vermelho': '#fef2f2', 'roxo': '#faf5ff', 'laranja': '#fff7ed' };
 
         async function fetchStore() {
             const { data, error } = await _supabase.from('produtos').select('*');
@@ -78,8 +77,8 @@
     </script>
 
     <header class="fixed top-0 w-full z-40 glass h-16 flex items-center justify-between px-6 lg:px-12">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="text-[10px] uppercase tracking-widest font-bold">Topo</button>
-        <script>document.write(`<a href="#" class="text-xl font-bold font-serif-luxury uppercase tracking-tighter" id="logo-text">${CONFIG.nomeLoja}</a>`);</script>
+        <button id="btn-topo" onclick="window.scrollTo({top:0, behavior:'smooth'})" class="text-[10px] uppercase tracking-widest font-bold transition-all">TOPO</button>
+        <script>document.write(`<a href="#" class="text-xl font-bold font-serif-luxury uppercase tracking-tighter transition-all" id="logo-text">${CONFIG.nomeLoja}</a>`);</script>
         <button onclick="toggleCart()" class="relative">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
@@ -89,15 +88,17 @@
     <section id="hero-section" class="relative w-full flex flex-col items-center justify-center pt-24 pb-8">
         <div id="hero-overlay" class="absolute inset-0 bg-[#ebe7e0] transition-colors duration-1000"></div>
         <div class="relative z-10 text-center px-6 w-full">
-            <h1 id="hero-title" class="text-5xl md:text-6xl font-serif-luxury mb-4">The Collection.</h1>
+            <h1 id="hero-title" class="text-5xl md:text-6xl font-serif-luxury mb-4 transition-all">The Collection.</h1>
             
-            <div class="bg-white/50 backdrop-blur p-1 rounded-full flex items-center relative w-56 h-10 cursor-pointer shadow-sm mx-auto mt-8 mb-12" onclick="toggleMode()">
+            <div class="bg-white/50 backdrop-blur p-1 rounded-full flex items-center relative w-56 h-10 cursor-pointer shadow-sm mx-auto mt-8 mb-10" onclick="toggleMode()">
                 <div id="mode-slider" class="absolute left-1 top-1 bottom-1 w-[calc(50%-4px)] bg-[#2c2c2c] rounded-full transition-all duration-500"></div>
                 <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-white" id="txt-adulto">Adulto</div>
                 <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-gray-500" id="txt-infantil">Infantil</div>
             </div>
             
-            <div class="max-w-screen-2xl mx-auto flex gap-2 overflow-x-auto cat-scroll justify-start md:justify-center px-2" id="cat-bar"></div>
+            <div class="cat-wrapper max-w-2xl mx-auto bg-white/40 backdrop-blur-sm border border-white/50 p-2 rounded-[2rem] shadow-sm flex gap-2 overflow-x-auto cat-scroll justify-start md:justify-center">
+                <div id="cat-bar" class="flex gap-2 w-full px-2"></div>
+            </div>
         </div>
     </section>
 
@@ -116,7 +117,7 @@
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-6 border-t bg-gray-50 space-y-4" id="cart-footer">
             <div class="flex justify-between font-bold"><span>Total</span><span id="cart-total">R$ 0,00</span></div>
-            <button onclick="checkoutWhatsApp()" class="w-full bg-[#25D366] text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-transform">Finalizar no WhatsApp</button>
+            <button onclick="checkoutWhatsApp()" class="w-full bg-black text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-transform">Finalizar no WhatsApp</button>
         </div>
     </div>
 
@@ -125,22 +126,23 @@
             currentMode = currentMode === 'Adulto' ? 'Infantil' : 'Adulto';
             const isKids = currentMode === 'Infantil';
             
-            // Controle do Slider
             document.getElementById('mode-slider').style.transform = isKids ? 'translateX(100%)' : 'translateX(0)';
             document.getElementById('mode-slider').style.backgroundColor = isKids ? '#ec4899' : '#2c2c2c';
             document.getElementById('txt-adulto').classList.toggle('text-white', !isKids);
             document.getElementById('txt-infantil').classList.toggle('text-white', isKids);
             
-            // Controle do Título (Resolve o Bug 2)
+            // Troca de Nome e Fonte
             const logo = document.getElementById('logo-text');
             logo.innerText = isKids ? CONFIG.nomeLojaInfantil : CONFIG.nomeLoja;
             logo.className = isKids 
-                ? 'text-xl font-bold font-kids text-pink-500 uppercase tracking-tighter' 
-                : 'text-xl font-bold font-serif-luxury uppercase tracking-tighter text-inherit';
+                ? 'text-xl font-bold font-kids text-pink-500 uppercase tracking-tighter transition-all' 
+                : 'text-xl font-bold font-serif-luxury uppercase tracking-tighter text-inherit transition-all';
+                
+            // Ícone de Urso no Topo
+            document.getElementById('btn-topo').innerText = isKids ? '🧸 TOPO' : 'TOPO';
 
             currentCategory = 'Tudo';
             renderStore();
-            if(isKids) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         }
 
         function renderStore() {
@@ -149,21 +151,32 @@
             const categories = ['Tudo', ...new Set(filtered.map(p => p.category))];
             
             document.getElementById('cat-bar').innerHTML = categories.map(c => `
-                <button onclick="currentCategory='${c}';renderStore()" class="cat-btn flex-shrink-0 px-4 py-1.5 rounded-full border text-[9px] font-bold uppercase tracking-widest transition-all ${currentCategory === c ? 'active' : 'text-gray-400 border-gray-200'}">${c}</button>
+                <button onclick="currentCategory='${c}';renderStore()" class="cat-btn flex-shrink-0 px-5 py-2 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-all ${currentCategory === c ? 'active' : 'bg-white/80 text-gray-500 border-transparent'}">${c}</button>
             `).join('');
 
             const final = currentCategory === 'Tudo' ? filtered : filtered.filter(p => p.category === currentCategory);
-            grid.innerHTML = final.map(p => `
-                <div class="group cursor-pointer fade-in product-card" onclick="openModal('${p.id}')">
+            
+            grid.innerHTML = final.map(p => {
+                // Cálculo de Estoque
+                const totalStock = p.variants.reduce((acc, varnt) => acc + Object.values(varnt.sizes).reduce((a, b) => a + b, 0), 0);
+                const isEsgotado = totalStock === 0;
+
+                return `
+                <div class="group cursor-pointer fade-in product-card relative" onclick="${isEsgotado ? '' : `openModal('${p.id}')`}">
                     <div class="overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-800 relative">
-                        ${p.tag ? `<span class="absolute top-3 right-3 bg-black text-white text-[8px] font-bold px-2 py-1 rounded-sm z-10">${p.tag}</span>` : ''}
+                        
+                        ${isEsgotado ? `<div class="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-[2px] z-20 flex items-center justify-center"><span class="bg-black dark:bg-white dark:text-black text-white px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded">Esgotado</span></div>` : ''}
+                        
+                        ${p.tag && !isEsgotado ? `<span class="absolute top-3 right-3 bg-black text-white text-[8px] font-bold px-2 py-1 rounded-sm z-10 animate-pulse">${p.tag}</span>` : ''}
+                        
                         <img src="${p.variants[0].image}" class="w-full aspect-product transition-transform duration-700 group-hover:scale-105" loading="lazy">
                     </div>
-                    <div class="mt-4 text-center">
+                    <div class="mt-4 text-center ${isEsgotado ? 'opacity-50' : ''}">
                         <h3 class="text-[11px] font-bold uppercase tracking-tight">${p.name}</h3>
                         <p class="text-[11px] font-serif-luxury italic opacity-50 mt-1">R$ ${p.price.toFixed(2)}</p>
                     </div>
-                </div>`).join('');
+                </div>`
+            }).join('');
         }
 
         let modalSelectedProduct, modalSelectedVariant, modalSelectedSize;
@@ -172,44 +185,100 @@
             modalSelectedProduct = products.find(prod => prod.id == id);
             modalSelectedVariant = modalSelectedProduct.variants[0];
             modalSelectedSize = null;
-            updateModalContent();
-            document.body.style.overflow = 'hidden';
-        };
-
-        const updateModalContent = () => {
+            
             const p = modalSelectedProduct; const v = modalSelectedVariant;
             const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const bgClass = isDark ? 'bg-[#1a1a1a]' : (colorDict[v.color.toLowerCase()] || 'bg-gray-50');
+            let bgHex = colorDict[v.color.toLowerCase()] || '#f9fafb';
+            if (isDark) bgHex = '#1a1a1a'; // Proteção para modo escuro
             
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal()"></div>
                     <div class="relative w-full max-w-5xl bg-white dark:bg-[#1f1f22] rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl fade-in">
                         <button onclick="closeModal()" class="absolute top-6 right-6 z-20 text-xl">✕</button>
-                        <div class="md:w-1/2 min-h-[300px] md:min-h-[400px] flex items-center justify-center ${bgClass} transition-colors duration-500">
-                            <img src="${v.image}" class="w-full h-full object-cover">
+                        
+                        <div id="modal-color-bg" class="md:w-1/2 min-h-[300px] md:min-h-[400px] flex items-center justify-center" style="background-color: ${bgHex}">
+                            <img id="modal-main-img" src="${v.image}" class="w-full h-full object-cover">
                         </div>
+                        
                         <div class="md:w-1/2 p-8 lg:p-12 flex flex-col justify-center text-left">
                             <h2 class="text-3xl font-serif-luxury mb-2 italic">${p.name}</h2>
                             <p class="text-xl font-bold mb-6 opacity-40">R$ ${p.price.toFixed(2)}</p>
-                            <div class="mb-6"><p class="text-[9px] font-bold uppercase mb-3 opacity-40">Cor: ${v.color}</p>
-                                <div class="flex flex-wrap gap-2">${p.variants.map((vItem, i) => `<button onclick="selectVariantInModal(${i})" class="px-4 py-2 border rounded-full text-[10px] font-bold uppercase ${vItem.color === v.color ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : 'border-gray-200 dark:border-gray-700'}">${vItem.color}</button>`).join('')}</div>
+                            
+                            <div class="mb-6"><p class="text-[9px] font-bold uppercase mb-3 opacity-40">Cor</p>
+                                <div id="modal-colors-container" class="flex flex-wrap gap-2"></div>
                             </div>
+                            
                             <div class="mb-8"><p class="text-[9px] font-bold uppercase mb-3 opacity-40">Tamanhos</p>
-                                <div class="flex flex-wrap gap-2">${Object.entries(v.sizes).map(([s, q]) => `<button onclick="selectSizeInModal('${s}', ${q}, this)" class="size-btn px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] font-bold ${q === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-black'} ${modalSelectedSize === s ? 'bg-black text-white dark:bg-white dark:text-black' : ''}">${s}</button>`).join('')}</div>
+                                <div id="modal-sizes-container" class="flex flex-wrap gap-2"></div>
                             </div>
+                            
                             <button id="modal-add-btn" onclick="confirmAddToCart()" class="w-full bg-black text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all opacity-30 cursor-not-allowed" disabled>Selecione um tamanho</button>
                         </div>
                     </div>
                 </div>`;
-            if(modalSelectedSize && v.sizes[modalSelectedSize] > 0) enableAddBtn();
+                
+            renderModalControls();
+            document.body.style.overflow = 'hidden';
         };
 
-        window.selectVariantInModal = (vidx) => { modalSelectedVariant = modalSelectedProduct.variants[vidx]; updateModalContent(); };
-        window.selectSizeInModal = (s, q, btn) => { if(q===0) return; modalSelectedSize = s; enableAddBtn(); updateModalContent(); };
-        function enableAddBtn() { const b = document.getElementById('modal-add-btn'); if(b) { b.disabled = false; b.classList.remove('opacity-30', 'cursor-not-allowed'); b.innerText = 'Adicionar à Sacola'; } }
-        window.confirmAddToCart = () => { cart.push({ name: modalSelectedProduct.name, price: modalSelectedProduct.price, color: modalSelectedVariant.color, size: modalSelectedSize, image: modalSelectedVariant.image }); updateBadge(); renderCart(); closeModal(); confetti({ particleCount: 50 }); };
-        
+        // Atualização suave via DOM (Sem piscar)
+        function renderModalControls() {
+            const p = modalSelectedProduct;
+            const v = modalSelectedVariant;
+            
+            // Render Cores
+            document.getElementById('modal-colors-container').innerHTML = p.variants.map((vItem, i) => `
+                <button onclick="changeVariantSmooth(${i})" class="px-4 py-2 border rounded-full text-[10px] font-bold uppercase transition-colors ${vItem.color === v.color ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : 'border-gray-200 dark:border-gray-700 hover:border-black'}">${vItem.color}</button>
+            `).join('');
+            
+            // Render Tamanhos
+            document.getElementById('modal-sizes-container').innerHTML = Object.entries(v.sizes).map(([s, q]) => `
+                <button onclick="selectSizeInModal('${s}', ${q}, this)" class="size-btn px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] font-bold transition-colors ${q === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-black dark:hover:border-gray-300'} ${modalSelectedSize === s ? 'bg-black text-white dark:bg-white dark:text-black border-transparent' : ''}">${s}</button>
+            `).join('');
+
+            // Atualiza Fundo
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (!isDark) {
+                let bgHex = colorDict[v.color.toLowerCase()] || '#f9fafb';
+                document.getElementById('modal-color-bg').style.backgroundColor = bgHex;
+            }
+        }
+
+        window.changeVariantSmooth = (vidx) => {
+            modalSelectedVariant = modalSelectedProduct.variants[vidx];
+            
+            // Efeito de fade na imagem
+            const imgEl = document.getElementById('modal-main-img');
+            imgEl.style.opacity = '0.5';
+            setTimeout(() => {
+                imgEl.src = modalSelectedVariant.image;
+                imgEl.style.opacity = '1';
+            }, 150);
+
+            // Se o tamanho que estava selecionado antes não tem estoque nessa cor, limpa a seleção
+            if (modalSelectedSize && modalSelectedVariant.sizes[modalSelectedSize] === 0) {
+                modalSelectedSize = null;
+                const b = document.getElementById('modal-add-btn');
+                b.disabled = true; b.classList.add('opacity-30', 'cursor-not-allowed'); b.innerText = 'Selecione um tamanho';
+            }
+            renderModalControls();
+        };
+
+        window.selectSizeInModal = (s, q, btn) => { 
+            if(q===0) return; 
+            modalSelectedSize = s; 
+            renderModalControls();
+            
+            const b = document.getElementById('modal-add-btn'); 
+            b.disabled = false; b.classList.remove('opacity-30', 'cursor-not-allowed'); b.innerText = 'Adicionar à Sacola'; 
+        };
+
+        window.confirmAddToCart = () => { 
+            cart.push({ name: modalSelectedProduct.name, price: modalSelectedProduct.price, color: modalSelectedVariant.color, size: modalSelectedSize, image: modalSelectedVariant.image }); 
+            updateBadge(); renderCart(); closeModal(); 
+        };
+
         function renderCart() { 
             const cont = document.getElementById('cart-items'); 
             cont.innerHTML = cart.map((it, i) => `
