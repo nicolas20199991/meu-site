@@ -1,719 +1,135 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>THE BOUTIQUE</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Quicksand:wght@700&display=swap" rel="stylesheet">
     
     <style>
         ::-webkit-scrollbar { display: none; }
-        body { font-family: 'Inter', sans-serif; background-color: #fdfdfd; color: #111; transition: background-color 0.8s ease, color 0.8s ease; overflow-x: hidden; -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .font-serif-luxury { font-family: 'Playfair Display', serif; }
-        .font-kids { font-family: 'Quicksand', sans-serif; letter-spacing: -0.01em; } 
-        
-        /* Dark Mode Classes (Q9) */
-        body.dark-mode { background-color: #121212; color: #ededed; }
-        body.dark-mode #bg-adulto { background-color: #1a1a1a; }
-        body.dark-mode #fade-adulto { background-image: linear-gradient(to top, #121212, transparent); }
-        body.dark-mode .glass { background: rgba(18, 18, 18, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        body.dark-mode .adult-card { background-color: #1e1e1e; border-color: #333; }
-        body.dark-mode #logo-text, body.dark-mode #hero-title { color: #fff; }
-        body.dark-mode .glass-pill { background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
-        body.dark-mode #filter-bar { background-color: rgba(18, 18, 18, 0.9); border-bottom-color: #333; }
-        body.dark-mode .cat-btn { border-color: #444; color: #aaa; }
-        body.dark-mode .cat-btn.active { background-color: #fff; color: #000; }
-        body.dark-mode #modal-content-box { background-color: #1e1e1e; color: #fff; }
-        body.dark-mode .size-btn { border-color: #444; color: #ccc; }
-        body.dark-mode .size-btn.bg-\[\#2c2c2c\] { background-color: #fff; color: #000; border-color: #fff; }
-        body.dark-mode .dark-text-desc { color: #aaa; }
-        
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.05); transition: transform 0.4s ease, background 0.8s ease; }
-        .header-hidden { transform: translateY(-100%); } 
-
-        #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #2c2c2c; z-index: 100; transition: width 0.1s ease, background-color 0.8s ease; }
-        body.theme-kids #progress-bar { background: #ec4899; }
-        body.dark-mode #progress-bar { background: #fff; }
-
-        .glass-pill { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.6); }
+        body { font-family: 'Inter', sans-serif; transition: all 0.5s ease; overflow-x: hidden; }
+        .dark-mode { background-color: #121212; color: #fff; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark-mode .glass { background: rgba(18, 18, 18, 0.8); border-bottom: 1px solid #333; }
         .aspect-product { aspect-ratio: 3 / 4; object-fit: cover; }
-        
-        .fade-in { animation: fadeIn 0.4s ease forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
-        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.8) translateY(30px); } 60% { opacity: 1; transform: scale(1.05) translateY(-10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-        .kids-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; opacity: 0; }
-        
-        @keyframes adultCartPop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        @keyframes kidsCartPop { 0% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.3) rotate(-10deg); } 50% { transform: scale(1.3) rotate(10deg); } 75% { transform: scale(1.3) rotate(-10deg); } 100% { transform: scale(1) rotate(0deg); } }
-        .adult-cart-anim { animation: adultCartPop 0.4s ease; }
-        .kids-cart-anim { animation: kidsCartPop 0.5s ease; }
-
-        .touch-zoom { transition: transform 0.3s ease; }
-        .touch-zoom:active { transform: scale(1.5); z-index: 50; position: relative; }
-
-        .bg-polka { background-image: radial-gradient(#fbcfe8 3px, transparent 3px); background-size: 40px 40px; background-color: #fdfafc; }
-        @keyframes cloudDrift { 0%, 100% { transform: translate(0, 0) rotate(-2deg); } 33% { transform: translate(25px, -15px) rotate(2deg); } 66% { transform: translate(-15px, 20px) rotate(0deg); } }
-        .animate-cloud { animation: cloudDrift 15s ease-in-out infinite; }
-        @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } 75% { transform: rotate(-1deg); } }
-        .kids-card:hover { animation: wiggle 0.4s ease-in-out; }
-        @keyframes curtainSweep { 0% { transform: translateY(100%); } 30%, 70% { transform: translateY(0); } 100% { transform: translateY(-100%); } }
-        .teleport-curtain { animation: curtainSweep 1.2s cubic-bezier(0.64, 0, 0.35, 1) forwards; }
-        @keyframes rocketFast { 0% { bottom: -20vh; transform: scale(1) rotate(-5deg); } 100% { bottom: 120vh; transform: scale(1.5) rotate(5deg); } }
-        .rocket-anim-fast { animation: rocketFast 0.8s ease-in forwards; }
-
-        #cart-sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .cart-open { transform: translateX(0) !important; }
-        .footer-kids { background: linear-gradient(to bottom right, #fdfbfd, #eff6ff) !important; border-top-color: #fbcfe8 !important; }
-
-        .cat-scroll::-webkit-scrollbar { display: none; }
-        .cat-btn.active { background: #111; color: white; border-color: #111; }
-        body.theme-kids .cat-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="antialiased selection:bg-[#2c2c2c] selection:text-white transition-colors duration-500">
+<body class="bg-[#fdfdfd] text-gray-900">
 
-    <a id="floating-wa" href="https://wa.me/5547988973201" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.4)] z-[9999] flex items-center justify-center hover:scale-110 transition-all duration-300">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-    </a>
+    <script>
+        const SUPABASE_URL = 'https://nhefdhzxzeddwjkzremz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <div id="progress-bar"></div>
+        let currentMode = 'Adulto';
+        let isDarkMode = false;
+        let products = [];
+        let cart = [];
 
-    <header id="main-header" class="fixed top-0 w-full z-40 glass">
-        <div class="max-w-screen-2xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
-            <div class="flex-1 flex gap-4 items-center">
-                <button onclick="scrollToTop()" class="text-[10px] uppercase tracking-widest flex items-center gap-2 font-bold hover:opacity-60 transition-opacity">
-                    <span id="menu-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
-                    TOPO
-                </button>
-            </div>
-            <a href="#" class="text-xl font-bold tracking-tighter uppercase text-center flex-1 transition-all duration-700 font-serif-luxury" id="logo-text">The Boutique</a>
-            <div class="flex-1 flex justify-end items-center gap-4">
-                <button onclick="toggleDarkMode()" id="dark-btn" class="relative hover:opacity-60 transition-opacity text-sm">☾</button>
-                
-                <button id="cart-icon-btn" onclick="toggleCart()" class="relative hover:opacity-60 transition-opacity">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    <span id="cart-badge" class="absolute -top-1 -right-2 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
-                </button>
-            </div>
+        async function fetchStore() {
+            const { data, error } = await _supabase.from('produtos').select('*');
+            if (!error) {
+                products = data;
+                renderStore();
+            }
+        }
+        window.onload = fetchStore;
+    </script>
+
+    <header class="fixed top-0 w-full z-40 glass h-16 flex items-center justify-between px-6">
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="text-[9px] font-bold uppercase tracking-widest">Topo</button>
+        <h1 class="font-serif italic text-xl" id="logo-text">The Boutique</h1>
+        <div class="flex gap-5 items-center">
+            <button onclick="toggleDarkMode()">☾</button>
+            <button onclick="toggleCart()" class="relative">👜<span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center hidden">0</span></button>
         </div>
     </header>
 
-    <section class="relative w-full min-h-[50vh] md:min-h-[60vh] flex flex-col items-center justify-center pt-16 overflow-hidden">
-        <div id="bg-adulto" class="absolute inset-0 bg-[#ebe7e0] transition-colors duration-1000 opacity-100 z-0"></div>
-        <div id="bg-infantil" class="absolute inset-0 bg-polka transition-opacity duration-1000 opacity-0 z-0">
-            <svg class="absolute top-16 left-1/4 w-12 h-12 text-pink-300/40 animate-cloud" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-            <svg class="absolute bottom-20 right-1/4 w-20 h-20 text-blue-300/40 animate-cloud" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-        </div>
-        
-        <div class="absolute inset-0 z-0 opacity-[0.15] mix-blend-multiply pointer-events-none" id="hero-texture">
-            <img src="https://images.unsplash.com/photo-1618220179428-22790b46a013?auto=format&fit=crop&w=2000&q=80" class="w-full h-full object-cover">
-        </div>
-
-        <div id="fade-adulto" class="absolute bottom-0 left-0 w-full h-32 md:h-48 bg-gradient-to-t from-[#fdfdfd] to-transparent z-0 transition-all duration-1000 opacity-100 pointer-events-none"></div>
-        <div id="fade-infantil" class="absolute bottom-0 left-0 w-full h-32 md:h-48 bg-gradient-to-t from-[#fdfcfd] to-transparent z-0 transition-opacity duration-1000 opacity-0 pointer-events-none"></div>
-
-        <div class="relative z-10 text-center px-6 flex flex-col items-center">
-            <h1 class="text-5xl md:text-7xl font-serif-luxury tracking-tight mb-4 transition-colors duration-500" id="hero-title">The Collection.</h1>
-            <p class="text-[9px] md:text-xs text-gray-600 mb-8 uppercase tracking-[0.3em] transition-colors duration-500" id="hero-subtitle">A Timeless Curated Selection.</p>
-            <div class="glass-pill p-1 rounded-full flex items-center relative w-56 h-10 cursor-pointer shadow-sm select-none" onclick="toggleMode(event)">
-                <div id="toggle-slider" class="absolute left-1 top-1 bottom-1 w-[calc(50%-4px)] bg-[#2c2c2c] rounded-full transition-all duration-500 shadow-md"></div>
-                <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-white transition-colors" id="btn-adulto">Adulto</div>
-                <div class="flex-1 text-center z-10 text-[9px] font-bold uppercase text-gray-600 transition-colors" id="btn-infantil">Infantil</div>
+    <main class="pt-24 pb-20 px-6 max-w-7xl mx-auto text-center">
+        <div class="flex justify-center mb-10">
+            <div class="bg-gray-100 rounded-full p-1 flex w-52 relative cursor-pointer" onclick="toggleMode()">
+                <div id="mode-slider" class="absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-black rounded-full transition-all duration-300"></div>
+                <div class="flex-1 text-center z-10 text-[9px] font-bold py-2.5 text-white" id="txt-adult">ADULTO</div>
+                <div class="flex-1 text-center z-10 text-[9px] font-bold py-2.5 text-gray-400" id="txt-infant">INFANTIL</div>
             </div>
         </div>
-    </section>
-
-    <div class="sticky top-16 z-30 bg-[#fdfdfd]/90 backdrop-blur border-b border-gray-100 transition-colors duration-800" id="filter-bar">
-        <div class="max-w-screen-2xl mx-auto px-6 py-3 flex gap-2 overflow-x-auto w-full cat-scroll pb-1" id="category-filters"></div>
-    </div>
-
-    <main class="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-12 pb-32 min-h-[40vh] relative z-10" id="store-container"></main>
-
-    <footer id="main-footer" class="bg-[#1a1a1a] text-white pt-20 pb-12 border-t border-[#2c2c2c] transition-all duration-1000 relative">
-        <div class="relative z-10 max-w-screen-2xl mx-auto px-6 lg:px-12 flex flex-col items-center text-center">
-            <h2 class="text-2xl font-serif-luxury italic mb-8 transition-all duration-700" id="footer-logo">The Boutique.</h2>
-            <div class="flex gap-8 mb-12 text-[10px] uppercase tracking-widest text-gray-400">
-                <a href="https://www.instagram.com" target="_blank" class="hover:opacity-60 transition-opacity">Instagram</a>
-                <a href="https://wa.me/5547988973201" target="_blank" class="hover:opacity-60 transition-opacity">Contato</a>
-            </div>
-            <p class="text-[10px] text-gray-600 uppercase tracking-widest" id="footer-copy">© 2026 The Boutique.</p>
-        </div>
-    </footer>
+        <div id="store-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+    </main>
 
     <div id="modal-container"></div>
 
-    <div id="cart-overlay" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm" onclick="toggleCart()"></div>
-    <div id="cart-sidebar" class="fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform translate-x-full flex flex-col text-gray-900">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h2 class="text-lg font-serif-luxury font-bold" id="cart-title">Sua Sacola</h2>
-            <button onclick="toggleCart()" class="hover:rotate-90 transition-transform">✕</button>
-        </div>
-        
-        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
-        
-        <div class="p-6 border-t border-gray-100 bg-gray-50 flex flex-col gap-4">
-            <div>
-                <label class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Observação (Opcional)</label>
-                <textarea id="cart-note" rows="2" placeholder="Ex: É para presente..." class="w-full border border-gray-200 rounded-lg text-xs p-2 focus:border-black outline-none resize-none"></textarea>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-xs text-gray-500 uppercase">Total</span>
-                <span class="text-xl font-bold" id="cart-total">R$ 0,00</span>
-            </div>
-            <button onclick="checkoutWhatsApp()" class="w-full bg-[#25D366] text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg hover:bg-[#1ebd57] transition-colors">Finalizar Encomenda</button>
-            <button onclick="clearCart()" class="text-[9px] font-bold uppercase text-red-400 hover:text-red-600 tracking-widest mt-2 text-center">Esvaziar Sacola</button>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed -bottom-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-xl z-[60] opacity-0 flex items-center gap-2 transition-all duration-300">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-        <span>Atualizado</span>
-    </div>
-
     <script>
-        let currentMode = 'Adulto'; 
-        let isDarkMode = false; // Estado do Dark Mode (Q9)
-        let cart = JSON.parse(localStorage.getItem('boutique_cart')) || [];
-        let currentCategory = 'Tudo';
-
-        // Q14: Dicionário de Cores do Modal Camaleão
-        const colorDict = {
-            'azul': 'bg-blue-50', 'rosa': 'bg-pink-50', 'verde': 'bg-green-50',
-            'amarel': 'bg-yellow-50', 'pret': 'bg-gray-200', 'branc': 'bg-gray-50',
-            'vermelh': 'bg-red-50', 'rox': 'bg-purple-50', 'laranj': 'bg-orange-50',
-            'marrom': 'bg-amber-50', 'bege': 'bg-orange-50', 'cinza': 'bg-gray-100'
-        };
-
-        function getProducts() { 
-            try { 
-                let data = JSON.parse(localStorage.getItem('the_boutique_db'))?.products || []; 
-                return data.map(p => {
-                    if(!p.variants) {
-                        p.variants = [{ id: p.id, color: 'Padrão', image: p.image, sizes: p.stock || {'Único': 0} }];
-                        p.category = p.category || 'Geral';
-                        p.description = p.description || '';
-                    }
-                    return p;
-                });
-            } catch { return []; } 
-        }
-        
-        function getProductTotalStock(p) {
-            if(!p.variants) return 0;
-            return p.variants.reduce((acc, v) => acc + Object.values(v.sizes).reduce((a,b)=>a+b,0), 0);
-        }
-        
-        function formatPrice(price) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price); }
-
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            document.getElementById('progress-bar').style.width = (winScroll / height) * 100 + "%";
-
-            const header = document.getElementById('main-header');
-            if (window.scrollY > 80) {
-                if (window.scrollY > lastScrollY) header.classList.add('header-hidden');
-                else header.classList.remove('header-hidden');
-            } else {
-                header.classList.remove('header-hidden');
-            }
-            lastScrollY = window.scrollY;
-        });
-
-        // Toggles & Filtros
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
-            applyThemeClasses();
-        }
-
-        function applyThemeClasses() {
-            const darkBtn = document.getElementById('dark-btn');
-            if (currentMode === 'Adulto' && isDarkMode) {
-                document.body.classList.add('dark-mode');
-                darkBtn.innerText = '☀';
-            } else {
-                document.body.classList.remove('dark-mode');
-                darkBtn.innerText = '☾';
-            }
-            
-            if (currentMode === 'Infantil') darkBtn.classList.add('hidden');
-            else darkBtn.classList.remove('hidden');
-        }
-
-        function setCategory(cat) { currentCategory = cat; renderStore(); }
-
-        function renderCategoryBar(visibleProducts) {
-            const container = document.getElementById('category-filters');
-            const cats = ['Tudo', ...new Set(visibleProducts.map(p => p.category || 'Geral'))];
-            container.innerHTML = cats.map(cat => `
-                <button onclick="setCategory('${cat}')" class="cat-btn flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-200 text-[10px] font-bold uppercase tracking-widest transition-colors ${currentCategory === cat ? 'active' : 'text-gray-500 hover:border-gray-400'}">
-                    ${cat}
-                </button>
-            `).join('');
-            
-            const bar = document.getElementById('filter-bar');
-            if (currentMode === 'Infantil') bar.style.backgroundColor = 'rgba(253, 252, 253, 0.9)';
-            else bar.style.backgroundColor = ''; // Remove inline para o dark mode agir
-        }
-
-        function getTagHTML(p) {
-            if (!p.tag) return '';
-            const isKids = currentMode === 'Infantil';
-            let colorClass = '';
-            if (p.tag === 'Novo') colorClass = 'tag-novo';
-            if (p.tag === 'Promoção') colorClass = 'tag-promo';
-            if (p.tag === 'Mais Vendido') colorClass = 'tag-bestseller';
-            const shapeClass = isKids ? 'rounded-full px-4 py-1.5 text-[9px] shadow-lg font-kids font-extrabold' : 'rounded-sm px-2 py-1 text-[8px] font-bold';
-            return `<span class="absolute top-4 right-4 ${colorClass} ${p.tagBlink ? 'animate-pulse' : ''} text-white uppercase tracking-widest z-10 ${shapeClass}">${p.tag}</span>`;
-        }
-
-        function generateProductCard(p) {
-            const available = getProductTotalStock(p) > 0;
-            const isKids = currentMode === 'Infantil';
-            const coverImage = p.variants && p.variants[0] ? p.variants[0].image : '';
-            
-            const cardBg = isKids ? 'bg-white border-[6px] border-white rounded-[2rem] shadow-[0_8px_25px_rgba(236,72,153,0.2)] kids-card' : 'bg-[#f4f4f4] rounded-2xl border border-black/5 adult-card transition-colors';
-            const imgRounded = isKids ? 'rounded-[1.2rem]' : 'rounded-2xl';
-            const titleFont = isKids ? 'font-kids font-bold text-base text-blue-900' : 'font-semibold text-xs text-gray-900 transition-colors';
-            const subtitleColor = isKids ? 'text-gray-400' : 'dark-text-desc';
-            
-            return `
-            <div class="group cursor-pointer relative fade-in" onclick="openModal('${p.id}')">
-                ${available ? getTagHTML(p) : `<span class="absolute top-4 left-4 ${isKids?'bg-blue-400':'bg-white text-gray-800'} text-[9px] font-bold uppercase px-3 py-1 z-10 rounded-full shadow-sm">Esgotado</span>`}
-                <div class="overflow-hidden ${cardBg}">
-                    <img src="${coverImage}" class="w-full aspect-product ${imgRounded} transition-transform duration-1000 group-hover:scale-105 ${!available ? 'grayscale opacity-50' : ''}">
-                </div>
-                <div class="mt-4 text-center">
-                    <h3 class="${titleFont}">${p.name}</h3>
-                    <p class="mt-1 ${isKids ? 'font-kids font-extrabold text-lg text-pink-500' : 'font-serif-luxury italic text-xs text-gray-500 transition-colors'}">${formatPrice(p.price)}</p>
-                    ${p.variants && p.variants.length > 1 ? `<p class="text-[9px] ${subtitleColor} mt-1 uppercase">${p.variants.length} Cores</p>` : ''}
-                </div>
-            </div>`;
-        }
-
-        function renderStore() {
-            let products = getProducts();
-            let visible = products.filter(p => p.sector === currentMode);
-            renderCategoryBar(visible); 
-            
-            if (currentCategory !== 'Tudo') visible = visible.filter(p => p.category === currentCategory);
-
-            // Mantém os esgotados no final por padrão
-            visible.sort((a, b) => {
-                let stockA = getProductTotalStock(a);
-                let stockB = getProductTotalStock(b);
-                if (stockA === 0 && stockB > 0) return 1;
-                if (stockA > 0 && stockB === 0) return -1;
-                return 0; 
-            });
-            
-            const container = document.getElementById('store-container');
-            if (visible.length === 0) { container.innerHTML = `<div class="text-center py-20 text-gray-400 text-xs uppercase tracking-widest">Nenhuma peça nesta categoria.</div>`; return; }
-
-            container.innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12 sm:gap-x-8 sm:gap-y-16">${visible.map(generateProductCard).join('')}</div>`;
-            applyThemeClasses();
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            document.getElementById('mode-slider').style.backgroundColor = isDarkMode ? '#fff' : '#000';
         }
 
         function toggleMode() {
             currentMode = currentMode === 'Adulto' ? 'Infantil' : 'Adulto';
-            currentCategory = 'Tudo'; 
-            const isKids = currentMode === 'Infantil';
-            
-            document.body.classList.toggle('theme-kids', isKids);
-            document.getElementById('toggle-slider').style.transform = isKids ? 'translateX(100%)' : 'translateX(0)';
-            document.getElementById('toggle-slider').style.backgroundColor = isKids ? '#ec4899' : '#2c2c2c';
-            
-            document.getElementById('btn-adulto').classList.toggle('text-white', !isKids);
-            document.getElementById('btn-adulto').classList.toggle('text-gray-600', isKids);
-            document.getElementById('btn-infantil').classList.toggle('text-white', isKids);
-            document.getElementById('btn-infantil').classList.toggle('text-gray-600', !isKids);
-
-            document.getElementById('bg-adulto').style.opacity = isKids ? '0' : '1';
-            document.getElementById('bg-infantil').style.opacity = isKids ? '1' : '0';
-            document.getElementById('fade-adulto').style.opacity = isKids ? '0' : '1';
-            document.getElementById('fade-infantil').style.opacity = isKids ? '1' : '0';
-
-            const logo = document.getElementById('logo-text');
-            const footerLogo = document.getElementById('footer-logo');
-            logo.style.opacity = '0';
-            setTimeout(() => {
-                logo.innerText = isKids ? 'The Little Boutique' : 'The Boutique';
-                logo.className = isKids ? 'text-xl font-bold transition-all duration-700 font-kids text-pink-500' : 'text-xl font-bold transition-all duration-700 font-serif-luxury';
-                logo.style.opacity = '1';
-                footerLogo.innerText = logo.innerText;
-                footerLogo.className = logo.className;
-            }, 300);
-
-            const menuIcon = document.getElementById('menu-icon');
-            menuIcon.innerHTML = isKids ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0ZM22 7a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"/><path d="M12 21a8 8 0 0 1-8-8V9a8 8 0 0 1 16 0v4a8 8 0 0 1-8 8Z"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><path d="M12 16v-2"/><path d="M10 16h4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
-
-            document.getElementById('main-footer').classList.toggle('footer-kids', isKids);
-            if(isKids) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            
+            document.getElementById('mode-slider').style.transform = currentMode === 'Infantil' ? 'translateX(100%)' : 'translateX(0)';
+            document.getElementById('txt-adult').classList.toggle('text-white', currentMode === 'Adulto');
+            document.getElementById('txt-infant').classList.toggle('text-white', currentMode === 'Infantil');
             renderStore();
         }
 
-        function scrollToTop() {
-            if(currentMode === 'Infantil') {
-                const curtain = document.createElement('div');
-                curtain.className = 'fixed inset-0 bg-pink-400 z-[100] teleport-curtain';
-                document.body.appendChild(curtain);
-                for(let i=0; i<20; i++){
-                    const rocket = document.createElement('div');
-                    rocket.innerHTML = '🚀';
-                    rocket.className = 'fixed z-[101] rocket-anim-fast pointer-events-none';
-                    rocket.style.left = `${Math.random()*95}%`;
-                    rocket.style.fontSize = `${Math.random()*4+3}rem`;
-                    document.body.appendChild(rocket);
-                    setTimeout(() => rocket.remove(), 1200);
-                }
-                setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 500);
-                setTimeout(() => curtain.remove(), 1200);
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        function toggleCart() { 
-            const sidebar = document.getElementById('cart-sidebar');
-            const overlay = document.getElementById('cart-overlay');
-            const waBtn = document.getElementById('floating-wa');
-            
-            sidebar.classList.toggle('cart-open'); 
-            overlay.classList.toggle('hidden'); 
-            
-            if(sidebar.classList.contains('cart-open')) waBtn.classList.add('opacity-0', 'pointer-events-none', 'scale-75');
-            else waBtn.classList.remove('opacity-0', 'pointer-events-none', 'scale-75');
-            
-            renderCart(); 
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById('cart-badge');
-            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0); 
-            if(totalItems > 0) {
-                badge.innerText = totalItems;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function renderCart() {
-            const container = document.getElementById('cart-items');
-            if (cart.length === 0) { container.innerHTML = '<p class="text-center text-gray-400 mt-20 text-xs uppercase tracking-widest">Sua sacola está vazia.</p>'; document.getElementById('cart-total').innerText = 'R$ 0,00'; updateCartBadge(); return; }
-            
-            container.innerHTML = cart.map((item, index) => `
-                <div class="flex gap-3 items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm text-gray-900">
-                    <img src="${item.image}" class="w-14 h-16 object-cover rounded-lg">
-                    <div class="flex-1 text-xs">
-                        <h4 class="font-bold line-clamp-1">${item.name}</h4>
-                        <p class="text-[9px] text-gray-500 uppercase mt-1">Cor: ${item.color || 'Padrão'} | Tam: <span class="font-bold text-black">${item.size}</span></p>
-                        <p class="font-semibold mt-1">${formatPrice(item.price)}</p>
-                    </div>
-                    <div class="flex flex-col items-center gap-1">
-                        <div class="flex items-center border border-gray-200 rounded">
-                            <button onclick="changeQty(${index}, -1)" class="px-2 py-1 text-gray-500 hover:bg-gray-100">-</button>
-                            <span class="text-[10px] font-bold px-2">${item.qty || 1}</span>
-                            <button onclick="changeQty(${index}, 1)" class="px-2 py-1 text-gray-500 hover:bg-gray-100">+</button>
-                        </div>
-                    </div>
-                </div>`).join('');
-                
-            const total = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
-            updateCartBadge();
-            document.getElementById('cart-total').innerText = formatPrice(total);
-        }
-
-        window.changeQty = (idx, delta) => {
-            cart[idx].qty = (cart[idx].qty || 1) + delta;
-            if(cart[idx].qty <= 0) cart.splice(idx, 1);
-            localStorage.setItem('boutique_cart', JSON.stringify(cart));
-            renderCart();
-        };
-
-        window.clearCart = () => { if(confirm("Esvaziar toda a sacola?")) { cart = []; localStorage.setItem('boutique_cart', JSON.stringify(cart)); renderCart(); } }; 
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.querySelector('span').innerText = msg;
-            toast.classList.add('toast-visible');
-            setTimeout(() => toast.classList.remove('toast-visible'), 3000);
-        }
-
-        function checkoutWhatsApp() {
-            if (cart.length === 0) return;
-            
-            const num = "5547988973201";
-            const hour = new Date().getHours();
-            let greeting = "Boa noite";
-            if(hour >= 5 && hour < 12) greeting = "Bom dia";
-            else if(hour >= 12 && hour < 18) greeting = "Boa tarde";
-
-            let text = `${greeting}, The Boutique! Gostaria de encomendar:\n\n`;
-            
-            cart.forEach((i, idx) => {
-                text += `${idx+1}. ${i.name}\n- Cor: ${i.color || 'Padrão'}\n- Tamanho: ${i.size}\n- Qtd: ${i.qty || 1}\n- Valor: ${formatPrice(i.price * (i.qty || 1))}\n\n`;
-            });
-            
-            const total = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
-            text += `*Total: ${formatPrice(total)}*\n`;
-
-            const note = document.getElementById('cart-note').value.trim();
-            if(note) text += `\n*Observação:* ${note}`;
-
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        let modalProduct = null;
-        let selectedVariant = null;
-        let selectedSize = null;
-
-        // Q14: Define a cor do fundo da imagem com base no nome
-        function getModalBgColorClass(colorName) {
-            const name = colorName.toLowerCase();
-            let bgClass = currentMode === 'Infantil' ? 'bg-pink-50' : 'bg-[#f4f4f4]';
-            if (isDarkMode && currentMode === 'Adulto') return 'bg-[#111]'; // No dark mode, fundo da foto fica bem escuro
-            
-            for (let key in colorDict) {
-                if (name.includes(key)) { bgClass = colorDict[key]; break; }
-            }
-            return bgClass;
-        }
-
-        function generateColorButtons() {
-            const isKids = currentMode === 'Infantil';
-            const tagBorder = isKids ? 'border-blue-200 text-blue-600' : 'border-gray-300';
-            
-            if (modalProduct.variants.length <= 1) return '';
-
-            const buttons = modalProduct.variants.map((v, idx) => {
-                const isSelected = v.id === selectedVariant.id;
-                const activeClass = isSelected 
-                    ? (isKids ? 'bg-blue-400 text-white border-blue-400' : 'bg-[#2c2c2c] text-white border-[#2c2c2c]') 
-                    : 'bg-transparent hover:border-gray-400';
-                return `
-                    <button onclick="changeVariant(${idx})" class="px-4 py-2 border ${tagBorder} text-[10px] font-bold uppercase tracking-widest ${isKids ? 'rounded-xl' : 'rounded-full'} transition-all focus:outline-none ${activeClass}">
-                        ${v.color}
-                    </button>
-                `;
-            }).join('');
-
-            return `
-                <div class="mb-4 border-t ${isKids ? 'border-pink-100' : 'border-gray-200 dark:border-[#333]'} pt-6">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-3 font-bold">Selecione a Cor</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${buttons}
-                    </div>
+        function renderStore() {
+            const grid = document.getElementById('store-grid');
+            const filtered = products.filter(p => p.sector === currentMode);
+            grid.innerHTML = filtered.map(p => `
+                <div class="cursor-pointer fade-in" onclick="openModal('${p.id}')">
+                    <img src="${p.variants[0].image}" class="w-full aspect-product rounded-2xl mb-3 shadow-sm hover:scale-105 transition-transform">
+                    <h3 class="text-[10px] font-bold uppercase">${p.name}</h3>
+                    <p class="text-[10px] opacity-50">R$ ${p.price.toFixed(2)}</p>
                 </div>
-            `;
-        }
-
-        function generateSizeButtons() {
-            const isKids = currentMode === 'Infantil';
-            const tagBorder = isKids ? 'border-blue-200 text-blue-600' : 'border-gray-300';
-            const sizeKeys = Object.keys(selectedVariant.sizes);
-
-            const buttons = sizeKeys.map(size => `
-                <button id="btn-size-${size}" onclick="selectSize('${size}', ${selectedVariant.sizes[size]})" class="size-btn px-4 py-2 border ${tagBorder} text-[10px] font-bold uppercase tracking-widest ${isKids ? 'rounded-xl' : 'rounded-full'} transition-colors focus:outline-none">
-                    ${size}
-                </button>
             `).join('');
-
-            return `
-                <div class="mb-8 ${modalProduct.variants.length <= 1 ? `border-t ${isKids ? 'border-pink-100' : 'border-gray-200 dark:border-[#333]'} pt-6` : ''}">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-3 font-bold">Selecione o Tamanho</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${buttons}
-                    </div>
-                    <p id="stock-feedback" class="text-[9px] uppercase tracking-widest font-bold mt-3 h-3 flex items-center"></p>
-                </div>
-            `;
         }
 
         window.openModal = (id) => {
-            modalProduct = getProducts().find(p => p.id === id);
-            if (!modalProduct) return;
-            
-            selectedVariant = modalProduct.variants[0]; 
-            selectedSize = null;
-
-            const isKids = currentMode === 'Infantil';
-            const btnColor = isKids ? 'bg-pink-400 hover:bg-pink-500 rounded-2xl' : 'bg-[#2c2c2c] hover:bg-black rounded-full';
-            const titleFont = isKids ? 'font-kids font-extrabold text-blue-900' : 'font-serif-luxury';
-            const modalImgBg = getModalBgColorClass(selectedVariant.color);
-            
-            // Q10: Descrição
-            const descHTML = modalProduct.description ? `
-                <div class="mt-2">
-                    <p id="desc-text" class="text-[10px] ${isKids ? 'text-gray-500' : 'dark-text-desc text-gray-500'} leading-relaxed line-clamp-2 transition-all duration-300">${modalProduct.description}</p>
-                    ${modalProduct.description.length > 80 ? `<button onclick="document.getElementById('desc-text').classList.toggle('line-clamp-2'); this.innerText = this.innerText === 'Ler mais' ? 'Ocultar' : 'Ler mais'" class="text-[9px] font-bold underline mt-1 ${isKids ? 'text-gray-800' : 'text-gray-400'}">Ler mais</button>` : ''}
-                </div>
-            ` : '';
-
+            const p = products.find(prod => prod.id == id);
+            const variant = p.variants[0];
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10">
-                    <div id="modal-overlay-bg" class="absolute inset-0 bg-[#111]/90 backdrop-blur-md transition-opacity duration-300 fade-in" onclick="closeModal()"></div>
-                    
-                    <div id="modal-content-box" class="relative w-full h-full md:h-auto md:max-w-5xl bg-[#fdfdfd] flex flex-col md:flex-row shadow-2xl overflow-y-auto md:overflow-hidden rounded-[2rem] transition-all duration-300 fade-in">
-                        <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/50 backdrop-blur shadow-sm hover:bg-gray-100 rounded-full transition-colors text-black">✕</button>
-                        
-                        <div id="modal-img-container" class="md:w-1/2 flex items-center justify-center min-h-[40vh] overflow-hidden relative transition-colors duration-500 ${modalImgBg}">
-                            <img id="modal-main-img" src="${selectedVariant.image}" class="w-full h-full object-cover rounded-2xl touch-zoom transition-opacity duration-300">
-                        </div>
-                        
-                        <div class="md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
-                            <p class="text-[9px] ${isKids ? 'text-pink-400' : 'text-gray-400'} font-bold uppercase tracking-widest mb-2">${modalProduct.sector} • ${modalProduct.category}</p>
-                            <h2 class="text-2xl lg:text-4xl tracking-tight mb-1 ${titleFont}">${modalProduct.name}</h2>
-                            <p class="text-lg font-medium ${isKids ? 'font-kids text-pink-500 font-bold' : 'text-gray-500'}">${formatPrice(modalProduct.price)}</p>
-                            
-                            ${descHTML}
-                            <div class="mt-4"></div>
-
-                            <div id="modal-color-container">${generateColorButtons()}</div>
-                            <div id="modal-size-container">${generateSizeButtons()}</div>
-
-                            <button id="btn-add-cart" onclick="addToCart()" class="w-full ${btnColor} text-white py-4 text-[10px] font-bold uppercase tracking-widest opacity-50 cursor-not-allowed transition-all shadow-md" disabled>
-                                Selecione um Tamanho
-                            </button>
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal()"></div>
+                    <div class="relative w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-[2rem] overflow-hidden flex flex-col md:flex-row">
+                        <button onclick="closeModal()" class="absolute top-4 right-4 text-xl">✕</button>
+                        <div class="md:w-1/2 p-4"><img src="${variant.image}" class="w-full h-full object-cover rounded-2xl"></div>
+                        <div class="md:w-1/2 p-8 flex flex-col justify-center text-left">
+                            <h2 class="text-3xl font-serif mb-2 italic">${p.name}</h2>
+                            <p class="text-xl font-bold mb-4 text-gray-500">R$ ${p.price.toFixed(2)}</p>
+                            <p class="text-xs opacity-60 mb-6">${p.description || ''}</p>
+                            <div class="mb-4"><p class="text-[9px] font-bold uppercase mb-2">Selecione o Tamanho</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${Object.keys(variant.sizes).map(s => `<button onclick="addToCart('${p.name}', '${s}', ${p.price}, '${variant.image}')" class="px-4 py-2 border rounded-lg text-[10px] font-bold hover:bg-black hover:text-white transition-all">${s}</button>`).join('')}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>`;
             document.body.style.overflow = 'hidden';
         };
 
-        window.changeVariant = (idx) => {
-            if (modalProduct.variants[idx].id === selectedVariant.id) return; 
-            
-            selectedVariant = modalProduct.variants[idx];
-            selectedSize = null;
-
-            // Q14: Transição de Fundo de Cor do Modal
-            const imgContainer = document.getElementById('modal-img-container');
-            imgContainer.className = `md:w-1/2 flex items-center justify-center min-h-[40vh] overflow-hidden relative transition-colors duration-500 ${getModalBgColorClass(selectedVariant.color)}`;
-
-            const imgEl = document.getElementById('modal-main-img');
-            imgEl.style.opacity = '0';
-            setTimeout(() => {
-                imgEl.src = selectedVariant.image;
-                imgEl.style.opacity = '1';
-            }, 150);
-
-            document.getElementById('modal-color-container').innerHTML = generateColorButtons();
-            document.getElementById('modal-size-container').innerHTML = generateSizeButtons();
-
-            const cartBtn = document.getElementById('btn-add-cart');
-            cartBtn.innerHTML = 'Selecione um Tamanho';
-            cartBtn.disabled = true;
-            cartBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const isKids = currentMode === 'Infantil';
-            if (isKids) {
-                cartBtn.classList.remove('bg-green-400', 'scale-105');
-                cartBtn.classList.add('bg-pink-400', 'hover:bg-pink-500');
-            } else {
-                cartBtn.classList.remove('bg-green-600');
-                cartBtn.classList.add('bg-[#2c2c2c]', 'hover:bg-black');
-            }
-        };
-
-        window.selectSize = (size, stockQty) => {
-            selectedSize = size;
-            const isKids = currentMode === 'Infantil';
-            
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                btn.classList.remove('bg-[#2c2c2c]', 'text-white', 'border-[#2c2c2c]', 'bg-blue-400', 'border-blue-400');
-            });
-            
-            const selectedBtn = document.getElementById(`btn-size-${size}`);
-            if(isKids) selectedBtn.classList.add('bg-blue-400', 'text-white', 'border-blue-400');
-            else selectedBtn.classList.add('bg-[#2c2c2c]', 'text-white', 'border-[#2c2c2c]');
-
-            const feedbackEl = document.getElementById('stock-feedback');
-            const cartBtn = document.getElementById('btn-add-cart');
-
-            // Q13: Escassez
-            if (stockQty > 0) {
-                let scarcityBadge = stockQty <= 3 ? `<span class="text-orange-500 border border-orange-500 px-2 py-0.5 rounded-full text-[8px] ml-2 animate-pulse">Últimas ${stockQty} un!</span>` : '';
-                feedbackEl.innerHTML = `<span class="text-green-600">Em estoque</span> ${scarcityBadge}`;
-                cartBtn.disabled = false;
-                cartBtn.innerHTML = 'Adicionar à Sacola';
-                cartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                feedbackEl.innerHTML = `<span class="text-red-600">Fora de estoque</span>`;
-                cartBtn.disabled = true;
-                cartBtn.innerHTML = 'Indisponível';
-                cartBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-        };
-
-        window.addToCart = () => {
-            if(!modalProduct || !selectedSize) return;
-            
-            // Q1: Vibração Haptic Feedback
+        window.addToCart = (name, size, price, image) => {
             if (navigator.vibrate) navigator.vibrate(50);
-
-            const btn = document.getElementById('btn-add-cart');
-            const isKids = currentMode === 'Infantil';
-
-            const cartIcon = document.getElementById('cart-icon-btn');
-            cartIcon.classList.remove('adult-cart-anim', 'kids-cart-anim');
-            void cartIcon.offsetWidth; 
-            cartIcon.classList.add(isKids ? 'kids-cart-anim' : 'adult-cart-anim');
-
-            if(isKids) {
-                btn.innerHTML = 'Eba! Na Sacola 🎈';
-                btn.classList.remove('bg-pink-400', 'hover:bg-pink-500');
-                btn.classList.add('bg-green-400', 'scale-105');
-                confetti({ particleCount: 100, spread: 60, origin: {y:0.6}, zIndex: 9999 });
-            } else {
-                btn.innerHTML = 'Adicionado ✓';
-                btn.classList.remove('bg-[#2c2c2c]', 'hover:bg-black');
-                btn.classList.add('bg-green-600');
-            }
-
-            const existingItem = cart.find(i => i.id === modalProduct.id && i.color === selectedVariant.color && i.size === selectedSize);
-            if(existingItem) {
-                existingItem.qty = (existingItem.qty || 1) + 1;
-            } else {
-                cart.push({ 
-                    id: modalProduct.id, 
-                    name: modalProduct.name, 
-                    price: modalProduct.price, 
-                    color: selectedVariant.color,
-                    size: selectedSize, 
-                    image: selectedVariant.image,
-                    qty: 1
-                });
-            }
-
-            localStorage.setItem('boutique_cart', JSON.stringify(cart));
-            updateCartBadge();
-            renderCart();
-
-            setTimeout(() => {
-                const modalBox = document.getElementById('modal-content-box');
-                const overlay = document.getElementById('modal-overlay-bg');
-                if(modalBox) { modalBox.style.transform = 'scale(0.9)'; modalBox.style.opacity = '0'; }
-                if(overlay) overlay.style.opacity = '0';
-                
-                setTimeout(() => {
-                    closeModal();
-                    showToast('Item adicionado à sacola');
-                }, 300);
-            }, isKids ? 800 : 400);
+            cart.push({ name, size, price, image });
+            document.getElementById('cart-badge').innerText = cart.length;
+            document.getElementById('cart-badge').classList.remove('hidden');
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            closeModal();
+            alert(`Adicionado: ${name} (Tam: ${size}) na sacola!`);
         };
 
         window.closeModal = () => { document.getElementById('modal-container').innerHTML = ''; document.body.style.overflow = 'auto'; };
-        
-        renderCart();
-        renderStore();
-        updateCartBadge();
+        function toggleCart() {
+            let msg = `Gostaria de encomendar:\n\n` + cart.map(i => `• ${i.name} (Tam: ${i.size})`).join('\n');
+            window.open(`https://wa.me/5547988973201?text=${encodeURIComponent(msg)}`);
+        }
     </script>
 </body>
 </html>
