@@ -45,13 +45,15 @@
         #modal-main-img { transition: opacity 0.3s ease; }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
 
     <script>
         const CONFIG = {
             nomeLoja: "The Boutique",
             nomeLojaInfantil: "The Little Boutique", 
             whatsapp: "5547988973201", 
+            email: "contato@theboutique.com", // NOVO: E-mail para o rodapé
+            instagram: "https://instagram.com", // NOVO: Link do insta para o rodapé
             
             Supabase_ProjectID: 'nhefdhzxzeddwjkzremz',
             Supabase_AnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U'
@@ -83,7 +85,7 @@
         </button>
     </header>
 
-    <section id="hero-section" class="relative w-full flex flex-col items-center justify-center pt-24 pb-8">
+    <section id="hero-section" class="relative w-full flex flex-col items-center justify-center pt-24 pb-8 flex-shrink-0">
         <div id="hero-overlay" class="absolute inset-0 bg-[#ebe7e0] transition-all duration-1000"></div>
         <div class="relative z-10 text-center px-6 w-full">
             <h1 id="hero-title" class="text-5xl md:text-6xl font-serif-luxury mb-4 transition-all">The Collection.</h1>
@@ -100,9 +102,44 @@
         </div>
     </section>
 
-    <main class="max-w-screen-2xl mx-auto px-6 lg:px-12 py-12 min-h-[40vh]">
+    <main class="max-w-screen-2xl mx-auto px-6 lg:px-12 py-12 flex-grow w-full">
         <div id="store-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12"></div>
     </main>
+
+    <footer class="w-full bg-gray-50 dark:bg-[#1a1a1a] border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-800 mt-auto">
+        <div class="max-w-screen-2xl mx-auto px-6 lg:px-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 text-center md:text-left">
+                
+                <div>
+                    <h3 class="text-xl font-bold font-serif-luxury uppercase tracking-tighter mb-4 transition-all" id="footer-logo">The Boutique</h3>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest leading-loose">Elevando o seu estilo com peças exclusivas e selecionadas a dedo. Qualidade em cada detalhe.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-gray-900 dark:text-gray-300">Fale Conosco</h4>
+                    <ul class="space-y-3 text-[11px] text-gray-500 uppercase tracking-widest">
+                        <li><a href="#" onclick="window.location.href='mailto:' + CONFIG.email" class="hover:text-black dark:hover:text-white transition-colors">E-mail</a></li>
+                        <li><a href="#" onclick="window.open('https://wa.me/' + CONFIG.whatsapp, '_blank')" class="hover:text-black dark:hover:text-white transition-colors">WhatsApp</a></li>
+                        <li><a href="#" onclick="window.open(CONFIG.instagram, '_blank')" class="hover:text-black dark:hover:text-white transition-colors">Instagram</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-gray-900 dark:text-gray-300">Institucional</h4>
+                    <ul class="space-y-3 text-[11px] text-gray-500 uppercase tracking-widest">
+                        <li><a href="#" class="hover:text-black dark:hover:text-white transition-colors">Termos de Uso</a></li>
+                        <li><a href="#" class="hover:text-black dark:hover:text-white transition-colors">Privacidade</a></li>
+                        <li><a href="#" class="hover:text-black dark:hover:text-white transition-colors">Trocas & Devoluções</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] text-gray-400 uppercase tracking-widest">
+                <p>&copy; <script>document.write(new Date().getFullYear())</script> <span id="footer-year-name">The Boutique</span>. Todos os direitos reservados.</p>
+                <p>Tecnologia por <span class="font-bold text-gray-800 dark:text-gray-200">Sua Agência Tech</span></p>
+            </div>
+        </div>
+    </footer>
 
     <div id="modal-container"></div>
 
@@ -130,11 +167,22 @@
             document.getElementById('txt-adulto').classList.toggle('text-white', !isKids);
             document.getElementById('txt-infantil').classList.toggle('text-white', isKids);
             
-            const logo = document.getElementById('logo-text');
-            logo.innerText = isKids ? CONFIG.nomeLojaInfantil : CONFIG.nomeLoja;
-            logo.className = isKids 
+            // Troca o nome do Header e também do Rodapé!
+            const logoHeader = document.getElementById('logo-text');
+            const logoFooter = document.getElementById('footer-logo');
+            const logoYear = document.getElementById('footer-year-name');
+            const currentName = isKids ? CONFIG.nomeLojaInfantil : CONFIG.nomeLoja;
+            
+            logoHeader.innerText = currentName;
+            logoFooter.innerText = currentName;
+            logoYear.innerText = currentName;
+            
+            const fontClass = isKids 
                 ? 'text-xl font-bold font-kids text-pink-500 uppercase tracking-tighter transition-all' 
                 : 'text-xl font-bold font-serif-luxury uppercase tracking-tighter text-inherit transition-all';
+                
+            logoHeader.className = fontClass;
+            logoFooter.className = fontClass;
                 
             document.getElementById('btn-topo').innerText = isKids ? '🧸 TOPO' : 'TOPO';
 
