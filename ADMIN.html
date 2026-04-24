@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Tower | Admin Cloud</title>
+    <title>Painel Admin | Controle de Estoque</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,10 +12,17 @@
 <body class="antialiased text-gray-900">
 
     <script>
-        // CONFIGURAÇÃO OFICIAL SUPABASE DO NICOLAS
-        const SUPABASE_URL = 'https://nhefdhzxzeddwjkzremz.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ==========================================
+        // CONFIGURAÇÕES DO PAINEL ADMIN
+        // ==========================================
+        const CONFIG_ADMIN = {
+            Supabase_ProjectID: 'nhefdhzxzeddwjkzremz',
+            Supabase_AnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZWZkaHp4emVkZHdqa3pyZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTY0NTgsImV4cCI6MjA5MjU3MjQ1OH0.trb1SIXCmTCXwXfyne4k8AZN7CGnbhphEW-tADUVd7U'
+        };
+        // ==========================================
+
+        const supabaseUrl = `https://${CONFIG_ADMIN.Supabase_ProjectID}.supabase.co`;
+        const _supabase = supabase.createClient(supabaseUrl, CONFIG_ADMIN.Supabase_AnonKey);
 
         function checkPIN() {
             const input = document.getElementById('pin-input').value;
@@ -32,22 +39,22 @@
     </script>
 
     <div id="login-screen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
-        <h1 class="text-xl font-bold tracking-widest uppercase mb-8">Control Tower</h1>
+        <h1 class="text-xl font-bold tracking-widest uppercase mb-8">Admin</h1>
         <input type="password" id="pin-input" placeholder="PIN" class="border border-gray-300 px-4 py-2 text-center tracking-[0.5em] focus:border-black outline-none rounded-lg mb-4 w-48">
-        <button onclick="checkPIN()" class="bg-black text-white px-8 py-2 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-gray-800">Entrar</button>
+        <button onclick="checkPIN()" class="bg-black text-white px-8 py-2 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-all">Entrar</button>
         <p id="pin-error" class="text-red-500 text-xs mt-4 hidden">Acesso Negado.</p>
     </div>
 
     <header class="border-b border-gray-100 sticky top-0 z-30 bg-white">
         <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <h1 class="text-sm font-semibold tracking-widest uppercase">The Control Tower <span class="ml-2 text-[8px] bg-green-100 text-green-600 px-2 py-0.5 rounded">Nuvem Online</span></h1>
+            <h1 class="text-sm font-semibold tracking-widest uppercase">Painel de Controle</h1>
             <a href="index.html" class="text-xs font-medium uppercase text-gray-500 hover:text-black">Abrir Loja ↗</a>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
         <div class="bg-gray-50 p-8 rounded-xl mb-12 border border-gray-200 shadow-sm">
-            <h2 id="form-title" class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-6">Cadastrar Peça na Nuvem</h2>
+            <h2 id="form-title" class="text-xs font-bold uppercase tracking-widest text-gray-800 mb-6">Cadastrar Peça</h2>
             
             <form id="product-form" onsubmit="saveProduct(event)" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
@@ -72,7 +79,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs text-gray-500 mb-2">Etiqueta</label>
-                        <select id="p-tag" class="w-full border border-gray-200 px-4 py-2 text-sm focus:border-black outline-none bg-white rounded-lg">
+                        <select id="p-tag" class="w-full border border-gray-200 px-4 py-2 text-sm focus:border-black outline-none bg-white rounded-lg animate-pulse">
                             <option value="">Nenhuma</option>
                             <option value="Novo">Novo</option>
                             <option value="Promoção">Promoção</option>
@@ -179,21 +186,23 @@
 
         function addVariantBlock(data = null) {
             const block = document.createElement('div');
-            block.className = 'variant-block bg-white border p-4 rounded-lg relative shadow-sm';
+            block.className = 'variant-block bg-white border p-4 rounded-lg relative shadow-sm mt-4';
             block.innerHTML = `
-                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-red-500 text-[10px] font-bold">✕ REMOVER</button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <input type="text" value="${data?data.color:''}" placeholder="Ex: Azul Royal" class="v-color w-full border p-2 text-sm mb-2 rounded outline-none">
-                        <input type="file" class="v-image text-[10px] mb-2">
+                        <input type="text" value="${data?data.color:''}" placeholder="Ex: Azul Royal" class="v-color w-full border p-2 text-sm mb-2 rounded outline-none" required>
+                        <input type="file" class="v-image text-[10px] mb-2 w-full">
                         <input type="hidden" class="v-existing-image-data" value="${data?data.image:''}">
                     </div>
                     <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold uppercase">Tamanhos</span>
-                            <button type="button" onclick="addSizeRow(this)" class="text-[10px] text-blue-500">+ ADICIONAR TAM</button>
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Tamanhos</span>
+                            <div class="flex gap-4">
+                                <button type="button" onclick="addSizeRow(this)" class="text-[10px] font-bold text-blue-500 hover:text-blue-700">+ ADICIONAR TAM</button>
+                                <button type="button" onclick="this.closest('.variant-block').remove()" class="text-red-500 text-[10px] font-bold hover:text-red-700">✕ REMOVER COR</button>
+                            </div>
                         </div>
-                        <div class="v-sizes-container"></div>
+                        <div class="v-sizes-container space-y-2"></div>
                     </div>
                 </div>
             `;
@@ -203,13 +212,13 @@
         }
 
         function addSizeRow(btn, s='', q=0) {
-            const container = btn.tagName === 'BUTTON' ? btn.parentElement.nextElementSibling : btn;
+            const container = btn.tagName === 'BUTTON' ? btn.closest('.grid').querySelector('.v-sizes-container') : btn;
             const div = document.createElement('div');
-            div.className = 'flex gap-2 size-row mb-1';
+            div.className = 'flex gap-2 size-row items-center';
             div.innerHTML = `
-                <input type="text" value="${s}" placeholder="P" class="v-size-name w-1/2 border p-1 rounded text-[10px]">
-                <input type="number" value="${q}" class="v-size-qty w-1/4 border p-1 rounded text-[10px]">
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-300 hover:text-red-500">✕</button>
+                <input type="text" value="${s}" placeholder="Ex: M" class="v-size-name w-1/2 border p-2 rounded text-xs outline-none" required>
+                <input type="number" value="${q}" class="v-size-qty w-1/3 border p-2 rounded text-xs outline-none" required min="0">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-300 hover:text-red-500 px-2 font-bold">✕</button>
             `;
             container.appendChild(div);
         }
@@ -253,7 +262,7 @@
             document.getElementById('product-form').reset(); 
             document.getElementById('variants-container').innerHTML = ''; 
             editingId = null; 
-            document.getElementById('form-title').innerText = "Cadastrar Peça na Nuvem";
+            document.getElementById('form-title').innerText = "Cadastrar Peça";
             addVariantBlock(); 
         }
 
